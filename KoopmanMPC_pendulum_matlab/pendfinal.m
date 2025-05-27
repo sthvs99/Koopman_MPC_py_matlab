@@ -2,8 +2,10 @@ clear all
 clc
 close all
 
-addpath('C:/Users/sabin/Desktop/KoopmanMPC-master/KoopmanMPC-master/Resources')
-addpath('C:/Users/sabin/Desktop/KoopmanMPC-master/KoopmanMPC-master/Resources/qpOASES-3.1.0/interfaces/matlab') 
+% addpath('C:/Users/sabin/Desktop/KoopmanMPC-master/KoopmanMPC-master/Resources')
+% addpath('C:/Users/sabin/Desktop/KoopmanMPC-master/KoopmanMPC-master/Resources/qpOASES-3.1.0/interfaces/matlab') 
+addpath('Resources')
+% addpath('Resources/qpOASES-3.1.0/interfaces/matlab') 
 
 
 %% ****************************** Dynamics ********************************
@@ -11,11 +13,11 @@ addpath('C:/Users/sabin/Desktop/KoopmanMPC-master/KoopmanMPC-master/Resources/qp
 n = 4; % Number of states
 m = 1; % Number of control inputs
 
+% Initializing syntax to reference function
 f_ud_pend = @f_ud_pend_new;
 
 umin = -1;
 umax = 1;
-
 
 x1min = 0;
 x1max = 0.5;
@@ -51,19 +53,22 @@ fprintf('Data collection DONE \n');
 
 %% Basis functions
 rng(115123)
-Nrbf = 100;
+Nrbf = 100; % take 100 observer functions as radial basis functions
 
 totalcols = size(X,2);
 idx = randperm(totalcols);
+% Create centers by using 100 random columns of states X
 cent = X(:,idx(1:Nrbf));
 
 rbf_type="polyharmonic";
+% Concatenates evaluation of radial basis function to xx vector
 liftFun = @(xx)( [xx;rbf(xx,cent,rbf_type)] );
 
 Nlift = numel(liftFun(rand(n,1)));
 % Lift
 disp('Starting LIFTING')
 
+% Returns 26 sets of lifted values
 Xlift = liftFun(X);
 Ylift = liftFun(Y);
 % Regression
@@ -128,7 +133,7 @@ plot([0:Nsim]*deltaT,sc11, '--r','linewidth',lw_koop)
 
 LEG = legend('True','Koopman');
 set(LEG,'Interpreter','latex','location','northeast','fontsize',30)
-set(gca,'FontSize',25);
+set(gca,'FontSize',11);
 %axis([0 1 -1.3 0.5])
 
 
@@ -140,26 +145,28 @@ plot([0:Nsim]*deltaT,sc12, '--r','linewidth',lw_koop)
 
 LEG = legend('True','Koopman');
 set(LEG,'Interpreter','latex','location','northeast','fontsize',30)
-set(gca,'FontSize',25);
+set(gca,'FontSize',11);
 %axis([0 1 -1.3 0.5])
 
 
 %% ********************** Feedback control ********************************
-Tmax = 5; % Simlation legth
-Nsim = Tmax/deltaT;
 
-x0 = [ 0; 0.; -pi; 0. ];
+% solver settings
+Tmax = 5; % Simlation legth
+Nsim = Tmax/deltaT; % number of discretization steps
+% x0 = [0; 0; -pi; 0]; % x, xdot, theta, thetadot
 
 % Define Koopman controller
 C = zeros(2,Nlift);  C(1,1) = 1;%C(2,3) = 1;
+
+% Prediction horizon
+Tpred = 2;
+Np = round(Tpred / deltaT);
 
 % Weight matrices
 Q = 200;
 R = 0.001;
 
-% Prediction horizon
-Tpred = 2;
-Np = round(Tpred / deltaT);
 % Constraints
 xlift_min = [-0.8;nan(Nlift-1,1)];
 xlift_max = [0.8;nan(Nlift-1,1)];
@@ -188,6 +195,7 @@ switch REF
         yrr11 = X(1,1:Nsim);
         yrr12 = X(3,1:Nsim); 
 end
+% Describes reference y!
 yrrc = [yrr11;yrr11;yrr12;yrr12];
 
 % Initial condition for the delay-embedded state (assuming zero control in the past)

@@ -18,7 +18,9 @@ end
 Cbig = C;
 Y = zeros(size(C,2),size(X,2));
 for i = 1:size(Cbig,2)
+    % Essentially loop over every column of C
     C = Cbig(:,i);
+    % Reproduce C for every column of states X
     C = repmat( C,1, size(X,2) );
     r_squared = sum( (X - C).^2 );
     switch type

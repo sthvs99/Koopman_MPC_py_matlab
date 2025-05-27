@@ -1,4 +1,5 @@
 # exclude everything except 
 *.DS_Store
-/build/* 
-/c_generated_code/* 
+KoopmanMPC_pendulum_matlab/build/* 
+KoopmanMPC_pendulum_matlab/c_generated_code/* 
+*.o
