@@ -1,5 +1,15 @@
 # exclude everything except 
 *.DS_Store
+
+# ignore build folders
 KoopmanMPC_pendulum_matlab/build/* 
 KoopmanMPC_pendulum_matlab/c_generated_code/* 
+
+# ignore compiled files
 *.o
+
+# ignore mat files for now
+*.mat
+
+# ignore .json created by acados
+acados_ocp_nlp.json
